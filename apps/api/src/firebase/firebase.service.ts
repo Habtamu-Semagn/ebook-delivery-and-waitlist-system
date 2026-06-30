@@ -27,6 +27,6 @@ export class FirebaseService implements OnModuleInit {
     }
 
     async verifyToken(token: string): Promise<DecodedIdToken> {
-        return getAuth(this.app).verifyIdToken(token);
+        return await getAuth(this.app).verifyIdToken(token);
     }
 }
