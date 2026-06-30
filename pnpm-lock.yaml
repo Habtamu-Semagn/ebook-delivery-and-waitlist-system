@@ -144,6 +144,9 @@ importers:
       '@nestjs/config':
         specifier: ^4.0.4
         version: 4.0.4(@nestjs/common@11.1.26(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@supabase/supabase-js':
+        specifier: ^2.108.2
+        version: 2.108.2
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.3.0(vite@8.0.16(@types/node@22.15.3)(jiti@2.7.0)(terser@5.48.0))

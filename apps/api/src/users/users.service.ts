@@ -20,14 +20,15 @@ export class UsersService {
     }
 
     async syncUser(firebaseUid: string, email: string) {
-        const {data: existingUser } = await this.supabase.from('users').select('id').eq('firebase_id', firebaseUid).single();
-
+        const {data: existingUser } = await this.supabase.from('users').select('id').eq('firebase_id', firebaseUid).maybeSingle();
+        console.log("existing user: ", existingUser)
         if(existingUser){
             return existingUser;
         }
-
-        const {data: newUser, error} = await this.supabase.from('users').insert({firebase_uid: firebaseUid, email}).select('id').single();
-
+        console.log("firebase uid:", firebaseUid)
+        console.log("email: ", email)
+        const {data: newUser, error} = await this.supabase.from('users').insert({firebase_uid: firebaseUid, email}).select('id').maybeSingle();
+        console.log("new user:", newUser)
         if(error) {
             throw new Error(`Failed to sync user: ${error.message}`);
         }
