@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [ 
@@ -12,6 +14,8 @@ import { UsersModule } from './users/users.module';
   }),
     FirebaseModule,
     UsersModule,
+    WebhooksModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
