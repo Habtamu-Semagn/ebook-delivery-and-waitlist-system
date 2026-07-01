@@ -3,7 +3,8 @@ import { WebhooksController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { webhooksProcessor } from './webhooks.processor'
+import { WebhooksProcessor } from './webhooks.processor'
+import { EmailModule } from 'src/email/email.module';
 @Module({
   imports: [
     BullModule.forRootAsync({
@@ -19,8 +20,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     BullModule.registerQueue({
       name: 'webhook-events',
     }),
+    EmailModule,
   ],
   controllers: [WebhooksController],
-  providers: [WebhooksService]
+  providers: [WebhooksService, WebhooksProcessor]
 })
 export class WebhooksModule {}

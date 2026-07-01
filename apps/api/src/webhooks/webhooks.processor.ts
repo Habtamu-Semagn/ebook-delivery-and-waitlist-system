@@ -2,12 +2,16 @@ import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Job } from "bullmq";
+import { EmailService } from "src/email/email.service";
 
 @Processor('webhook-events')
 export class WebhooksProcessor extends WorkerHost {
   private supabase: SupabaseClient;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private emailService: EmailService
+  ) {
     super();
     this.supabase = createClient(
       this.configService.getOrThrow<string>('SUPABASE_URL'),
@@ -49,6 +53,17 @@ export class WebhooksProcessor extends WorkerHost {
     
     if(error) {
         throw new Error(`Failed to update purchase status: ${error.message}`)
+    }
+
+    // Get purchase details for email
+    const {data: purchase} = await this.supabase.from('purchases').select('*, users(email), books(title, file_url)').eq('payment_order_id', sessionId.id).maybeSingle();
+
+    if(purchase?.users?.email && purchase?.books?.title) {
+      await this.emailService.sendPurchaseConfirmation(
+        purchase.users.email,
+        purchase.books.title,
+        purchase.books.file_url
+      )
     }
     // update purchases table: status = 'completed'
     // (later: trigger confirmation email - Day 5)
