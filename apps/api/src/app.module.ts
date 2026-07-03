@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { EmailModule } from './email/email.module';
+import { BooksModule } from './books/books.module';
 
 @Module({
   imports: [ 
@@ -16,6 +17,7 @@ import { EmailModule } from './email/email.module';
     UsersModule,
     WebhooksModule,
     EmailModule,
+    BooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
