@@ -8,6 +8,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { EmailModule } from './email/email.module';
 import { BooksModule } from './books/books.module';
 import { OrdersModule } from './orders/orders.module';
+import { WaitlistModule } from './waitlist/waitlist.module';
 
 @Module({
   imports: [ 
@@ -20,6 +21,7 @@ import { OrdersModule } from './orders/orders.module';
     EmailModule,
     BooksModule,
     OrdersModule,
+    WaitlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],
