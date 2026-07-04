@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { EmailModule } from './email/email.module';
 import { BooksModule } from './books/books.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [ 
@@ -18,6 +19,7 @@ import { BooksModule } from './books/books.module';
     WebhooksModule,
     EmailModule,
     BooksModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
