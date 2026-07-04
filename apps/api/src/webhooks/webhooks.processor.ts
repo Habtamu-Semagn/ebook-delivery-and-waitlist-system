@@ -26,8 +26,8 @@ export class WebhooksProcessor extends WorkerHost {
 
   async process(job: Job): Promise<void> {
     const { eventId, eventType, data } = job.data;
+     console.log('🔥 Processing job:', eventType, eventId);
     try {
-
         switch(eventType) {
             case 'checkout.session.completed':
             await this.handlePaymentSucceeded(data);
@@ -41,6 +41,7 @@ export class WebhooksProcessor extends WorkerHost {
 
         await this.updateEventStatus(eventId, 'processed')
     } catch (err) {
+        console.error('❌ Job failed:', eventType, err);
         await this.updateEventStatus(eventId, 'failed');
         throw err;
     }
@@ -48,6 +49,7 @@ export class WebhooksProcessor extends WorkerHost {
 
   private async handlePaymentSucceeded(data: any): Promise<void> {
     const sessionId = data.object.id;
+    console.log('Processing payment succeeded for session:', sessionId);
 
     const { error } = await this.supabase.from('purchases').update({status: 'completed'}).eq('payment_order_id', sessionId);
     
@@ -56,14 +58,18 @@ export class WebhooksProcessor extends WorkerHost {
     }
 
     // Get purchase details for email
-    const {data: purchase} = await this.supabase.from('purchases').select('*, users(email), books(title, file_url)').eq('payment_order_id', sessionId.id).maybeSingle();
+    const {data: purchase} = await this.supabase.from('purchases').select('*, users(email), books(title, file_url)').eq('payment_order_id', sessionId).maybeSingle();
 
+    console.log('Purchase found:', purchase);
     if(purchase?.users?.email && purchase?.books?.title) {
+      const { data: signedUrl } = await this.supabase.storage.from('ebooks').createSignedUrl(purchase.books.file_url, 60 * 60 * 24);
+      const downloadUrl = signedUrl?.signedUrl ?? purchase.books.file_url;
       await this.emailService.sendPurchaseConfirmation(
         purchase.users.email,
         purchase.books.title,
-        purchase.books.file_url
-      )
+        downloadUrl,
+      );
+      console.log('purchase confirmation email sent to: ', purchase.users.email)
     }
     // update purchases table: status = 'completed'
     // (later: trigger confirmation email - Day 5)
