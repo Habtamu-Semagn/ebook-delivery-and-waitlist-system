@@ -69,16 +69,21 @@ export class WebhooksService {
         const alreadyProcessed = await this.isEventAlreadyProcessed(event.id);
 
         if (alreadyProcessed) {
+          console.log('Event already processed:', event.id);
           return;
         }
     
         await this.saveEvent(event.id, event);
     
+        console.log('Adding job to queue for event:', event.id, event.type);
+
         await this.webhookQueue.add('process-webhook', {
           eventId: event.id,
           eventType: event.type,
           data: event.data,
         });
+
+        console.log('Job added to queue successfully');
       // 1. check isEventAlreadyProcessed(event.id) -> if true, return early
       // 2. call saveEvent(event.id, event)
       // 3. add job to webhookQueue with event data
