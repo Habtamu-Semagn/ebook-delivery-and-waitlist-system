@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards, Logger, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FirebaseAuthGuard } from 'src/guards/firebase-auth.guard';
 
@@ -13,5 +13,12 @@ export class UsersController {
         this.logger.log(`Syncing user: ${req.user.uid}`);
         const { uid, email } = req.user;
         return this.usersService.syncUser(uid, email);
+    }
+
+    @Post('set-admin/:uid')
+    async setAdmin(@Param('uid') uid: string) {
+      const { getAuth } = await import('firebase-admin/auth');
+      await getAuth().setCustomUserClaims(uid, { admin: true });
+      return { success: true };
     }
 }
