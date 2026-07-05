@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { WaitlistService } from './waitlist.service';
 import { FirebaseAuthGuard } from 'src/guards/firebase-auth.guard';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('waitlist')
 export class WaitlistController {
@@ -12,7 +13,7 @@ export class WaitlistController {
     }
 
     @Get("count")
-    @UseGuards(FirebaseAuthGuard)
+    @UseGuards(AdminGuard)
     async getwaitlistCount() {
         return this.waitlistService.getWaitlistCount();
     }
