@@ -60,7 +60,6 @@ export class WebhooksProcessor extends WorkerHost {
     // Get purchase details for email
     const {data: purchase} = await this.supabase.from('purchases').select('*, users(email), books(title, file_url)').eq('payment_order_id', sessionId).maybeSingle();
 
-    console.log('Purchase found:', purchase);
     if(purchase?.users?.email && purchase?.books?.title) {
       const { data: signedUrl } = await this.supabase.storage.from('ebooks').createSignedUrl(purchase.books.file_url, 60 * 60 * 24);
       const downloadUrl = signedUrl?.signedUrl ?? purchase.books.file_url;
