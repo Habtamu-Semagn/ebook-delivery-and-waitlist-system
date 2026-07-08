@@ -77,15 +77,20 @@ export class WebhooksService {
     
         console.log('Adding job to queue for event:', event.id, event.type);
 
-        await this.webhookQueue.add('process-webhook', {
+        // Fire and forget - don't await queue operations to prevent webhook timeout
+        // Stripe expects fast response (< 5s), queue job is added in background
+        this.webhookQueue.add('process-webhook', {
           eventId: event.id,
           eventType: event.type,
           data: event.data,
+        }).catch(err => {
+          console.error('Failed to add webhook job to queue:', err);
+          // Log but don't throw - event is saved, queue operation can retry
         });
 
-        console.log('Job added to queue successfully');
+        console.log('Job queued (async)');
       // 1. check isEventAlreadyProcessed(event.id) -> if true, return early
       // 2. call saveEvent(event.id, event)
-      // 3. add job to webhookQueue with event data
+      // 3. add job to webhookQueue with event data (fire & forget)
     }
 }

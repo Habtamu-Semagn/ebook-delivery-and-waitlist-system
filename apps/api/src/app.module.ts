@@ -9,6 +9,7 @@ import { EmailModule } from './email/email.module';
 import { BooksModule } from './books/books.module';
 import { OrdersModule } from './orders/orders.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
   imports: [ 
@@ -22,6 +23,7 @@ import { WaitlistModule } from './waitlist/waitlist.module';
     BooksModule,
     OrdersModule,
     WaitlistModule,
+    PurchasesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

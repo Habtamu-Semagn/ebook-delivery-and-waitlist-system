@@ -28,6 +28,20 @@ export class BooksService {
         return data;
     }
 
+    async getBookById(bookId: string) {
+        const {data, error} = await this.supabase.from('books').select('id, title, description, price, author, is_active').eq('id', bookId).eq('is_active', true).maybeSingle();
+
+        if(error) {
+            throw new Error(`Failed to fetch book: ${error.message}`);
+        }
+
+        if(!data) {
+            throw new NotFoundException('Book not found');
+        }
+
+        return data;
+    }
+
     async generateDownloadUrl(bookId: string, firebaseUid: string): Promise<{ downloadUrl: string }> {
         // Get the user data from supabse
         const {data: user} = await this.supabase.from('users').select('id').eq('firebase_uid', firebaseUid).maybeSingle();
