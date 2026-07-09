@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WebhooksProcessor } from './webhooks.processor'
 import { EmailModule } from 'src/email/email.module';
+
 @Module({
   imports: [
     BullModule.forRootAsync({
@@ -19,6 +20,12 @@ import { EmailModule } from 'src/email/email.module';
     }),
     BullModule.registerQueue({
       name: 'webhook-events',
+      defaultJobOptions: {
+        attempts: 6,
+        backoff: {
+          type: 'custom',
+        }
+      }
     }),
     EmailModule,
   ],

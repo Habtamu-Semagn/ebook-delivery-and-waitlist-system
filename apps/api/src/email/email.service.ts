@@ -19,6 +19,7 @@ export class EmailService {
         bookTitle: string,
         downloadUrl: string,
     ): Promise<void> {
+        console.log(`Sending purchase confirmation to ${to} for book ${bookTitle}`);
         await this.resend.emails.send({
             from: this.fromEmail,
             to,
@@ -99,4 +100,9 @@ export class EmailService {
             `,
         })
     }
+
+    async sendAdminAlert(subject: string, body: string): Promise<void> {
+    // Implement your email provider logic here (e.g., Resend, SendGrid, Nodemailer)
+    console.log(`[Email Sent to Admin] Subject: ${subject}`);
+  }
 }
