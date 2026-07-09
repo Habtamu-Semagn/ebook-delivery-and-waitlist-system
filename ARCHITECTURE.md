@@ -449,3 +449,77 @@ pnpm --filter=web preview         # Preview built web app
 
 **Last Updated**: July 2026  
 **Version**: 1.0 (Week 2 Complete)
+
+Idempotent Webhook Processing & DLQ System
+System Overview
+The goal of this subsystem is to provide guaranteed at-least-once processing for asynchronous incoming webhooks (e.g., Stripe) without duplicating transactions, while maintaining fault isolation, exponential backoff retries, and dead-letter queue (DLQ) alerting.
+
+Key Design Decisions & Architecture
+[ Incoming Webhook ] ──> [ Controller ] ──> [ Check event_id in DB ]
+                                                    │
+                                                    ├──> Already Exists? ──> Return 200 OK (Skip)
+                                                    │
+                                                   NEW
+                                                    │
+                                                    ▼
+                                          [ Enqueue to BullMQ ]
+                                                    │
+                                                    ▼
+                                         [ WebhooksProcessor ]
+                                                    │
+                                  ┌─────────────────┴─────────────────┐
+                             ( Success )                         ( Exception )
+                                  │                                   │
+                                  ▼                                   ▼
+                       Mark DB 'processed'                  Trigger Backoff Strategy
+                                                            (1m, 5m, 30m, 2h, 24h)
+                                                                      │
+                                                           ┌──────────┴──────────┐
+                                                    (Attempts < 6)        (Attempts == 6)
+                                                           │                     │
+                                                           ▼                     ▼
+                                                      Retry Job            Mark DB 'failed'
+                                                                           + Send Admin Alert
+1. Two-Tiered Idempotency Strategy
+Decision: Implement idempotency check at the database layer using unique event_id keys prior to queuing, combined with deterministic status updates inside the processor.
+
+Rationale: Webhook providers like Stripe can send duplicate event payloads due to network timeouts on their side. Checking event_id upon ingestion ensures we return 200 OK instantly to Stripe without executing business logic (like double-charging or duplicate digital asset delivery).
+
+2. Custom Exponential Retry Backoff via BullMQ Settings
+Decision: Use custom backoff delays configured via defaultJobOptions on BullModule.registerQueue paired with worker-level backoffStrategy.
+
+Delays Configured: [1m, 5m, 30m, 2h, 24h] (5 retry attempts across 24+ hours).
+
+Rationale: Third-party API failures (e.g., Supabase downtime, storage service degradation) are often transient. Standard fixed interval retries can hammer a recovering service (Thundering Herd Problem). Exponential delays allow upstream services time to stabilize before subsequent attempts.
+
+3. Separation of Concerns for Error Recovery
+Decision: Keep the process() worker method strictly focused on the "happy path" and allow unhandled exceptions to bubble up to BullMQ. Delegate all failure state tracking to the @OnWorkerEvent('failed') listener.
+
+Rationale:
+
+If process() catches its own errors locally without re-throwing, BullMQ assumes the job succeeded and will never trigger retries or DLQ handlers.
+
+Marking a record as 'failed' in the DB during intermediate attempts gives false negatives in audit logs. The record should only transition to 'failed' when all 5 retries are completely exhausted.
+
+4. Controlled Status Schema (pending, processed, failed)
+Decision: Maintain a strict set of 3 status values in the webhook_events table rather than introducing unstructured dynamic string states.
+
+Status Lifecycles:
+
+pending: Event ingested and queued.
+
+processed: Business logic completed successfully OR event type was safely unhandled/ignored (e.g., payment_intent.created).
+
+failed: All 5 retry attempts failed; moved to DLQ status.
+
+Rationale: Keeps database queries, dashboards, and schema constraints clean and predictable. Unhandled event types are safely marked 'processed' to prevent them from remaining stuck in 'pending' indefinitely.
+
+5. Dead-Letter Queue (DLQ) & Admin Alert Isolation
+Decision: Wrap the @OnWorkerEvent('failed') listener in an internal try/catch block.
+
+Rationale: The DLQ execution is our last line of defense. If the alert email service or DB logging fails during the DLQ stage, we must catch the error locally to prevent an unhandled promise rejection from crashing the entire NestJS microservice process.
+
+6. Mock-Driven Testing for Asynchronous Retries
+Decision: Test retry and failure mechanisms in isolation by mocking Supabase client responses and EmailService invocations using Jest spies.
+
+Rationale: Unit tests must execute fast without firing real HTTP requests or modifying production/staging databases. Mocking allows testing edge cases (like simulated 6th attempt failures) instantly in under 1 second.

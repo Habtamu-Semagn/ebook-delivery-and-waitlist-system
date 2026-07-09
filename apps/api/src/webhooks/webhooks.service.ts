@@ -57,6 +57,7 @@ export class WebhooksService {
           event_id: eventId,
           payload,
           status: 'pending',
+          attempts: 0,
         });
 
         if (error) {
@@ -67,14 +68,13 @@ export class WebhooksService {
 
     async processEvent(event: Stripe.Event): Promise<void> {
         const alreadyProcessed = await this.isEventAlreadyProcessed(event.id);
-
         if (alreadyProcessed) {
           console.log('Event already processed:', event.id);
           return;
         }
-    
+        
         await this.saveEvent(event.id, event);
-    
+        
         console.log('Adding job to queue for event:', event.id, event.type);
 
         // Fire and forget - don't await queue operations to prevent webhook timeout
@@ -83,6 +83,13 @@ export class WebhooksService {
           eventId: event.id,
           eventType: event.type,
           data: event.data,
+        }, {
+          attempts: 5,
+          backoff: {
+            type: 'custom',
+          },
+          removeOnComplete: true,
+          removeOnFail: false
         }).catch(err => {
           console.error('Failed to add webhook job to queue:', err);
           // Log but don't throw - event is saved, queue operation can retry
