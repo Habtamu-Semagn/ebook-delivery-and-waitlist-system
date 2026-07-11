@@ -4,6 +4,7 @@ import { BookOpen, Download, AlertCircle } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { getDownloadUrl, fetchPurchases } from '../lib/api'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/purchases')({
   component: PurchasesPage,
@@ -53,9 +54,47 @@ function PurchasesPage() {
       const token = await getToken()
       if (!token) return
       const data = await getDownloadUrl(bookId, token)
-      window.open(data.downloadUrl, '_blank')
-    } catch (err) {
+      const urlPath = new URL(data.downloadUrl).pathname
+      const rawFileName = urlPath.split('/').pop() || `book-${bookId}.epub`
+      
+      // Decode URI components (e.g., converts "%20" back to real spaces)
+      const fileName = decodeURIComponent(rawFileName)
+
+      // 3. Fetch the file bytes as a blob
+      const response = await fetch(data.downloadUrl)
+      if (!response.ok) throw new Error('Failed to fetch file payload')
+      
+      const blob = await response.blob()
+      
+      // 4. Trigger local browser file download with the extracted name
+      const blobUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = fileName // 👈 Set to the real extracted filename
+      
+      document.body.appendChild(link)
+      link.click()
+      
+      // 5. Clean up DOM and memory
+      link.remove()
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (err: any) {
       console.error('Failed to get download URL:', err)
+
+      // Extract status and message safely
+      const status = err?.status || err?.response?.status
+      const message = err?.message || err?.response?.data?.message || ''
+        
+      // Trigger toast based on rate limit response
+      if (status === 429 || message.toLowerCase().includes('limit')) {
+        toast.error('Download Limit Reached', {
+          description: 'You can download up to 5 times per hour. Please try again later.',
+        })
+      } else {
+        toast.error('Download Failed', {
+          description: message || 'Something went wrong while fetching your file.',
+        })
+      }
     } finally {
       setDownloadingId(null)
     }

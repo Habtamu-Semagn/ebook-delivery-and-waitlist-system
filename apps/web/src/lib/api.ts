@@ -35,10 +35,21 @@ export async function createOrder(bookId: string, token: string) {
 export async function getDownloadUrl(bookId: string, token: string) {
   const res = await fetch(`${API_URL}/books/${bookId}/download`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   })
-  if (!res.ok) throw new Error('Failed to get download URL')
-  return res.json()
+  const data = await res.json()
+  
+  if(!res.ok) {
+    throw {
+      status: res.status,
+      message: data.message || 'Failed to get download URL',
+    }
+  }
+
+  return data;
 }
 
 export async function joinWaitlist(email: string) {

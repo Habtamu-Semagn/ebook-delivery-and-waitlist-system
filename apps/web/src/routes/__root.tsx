@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
+import { Toaster } from '../components/ui/sonner' // 👈 Added Toaster import
 
 import appCss from '../styles.css?url'
 
@@ -30,6 +31,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Navbar />
         {children}
         <Footer />
+        
+        {/* 👇 Renders toast notifications cleanly on top of all pages */}
+        <Toaster position="top-right" richColors />
+
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[{ name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> }]}

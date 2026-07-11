@@ -36,6 +36,8 @@ export class BooksController {
         @Param('bookId') bookId: string,
         @Req() req: any,
     ) {
-        return this.booksService.generateDownloadUrl(bookId, req.user.uid);
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        const clientIp = Array.isArray(ip) ? ip[0] : ip;
+        return this.booksService.generateDownloadUrl(bookId, req.user.uid, clientIp);
     }
 }
