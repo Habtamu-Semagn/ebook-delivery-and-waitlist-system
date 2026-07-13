@@ -1,9 +1,18 @@
+import "./instrument"
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import ws from 'ws'
+
+if (!globalThis.WebSocket) {
+  // @ts-expect-error ws compatible type
+  globalThis.WebSocket = ws
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {rawBody: true});
+  app.useGlobalFilters(new GlobalExceptionFilter())
 
   app.enableCors({
     origin: "http://localhost:3000",

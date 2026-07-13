@@ -1,0 +1,3 @@
+
+[auth]
+token=$SENTRY_AUTH_TOKEN

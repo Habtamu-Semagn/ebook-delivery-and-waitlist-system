@@ -6,9 +6,10 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
+    "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build",
+    "build": "vite build && cp instrument.server.mjs .output/server",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
@@ -18,6 +19,7 @@
   "dependencies": {
     "@ebook/shared-types": "workspace:*",
     "@nestjs/config": "^4.0.4",
+    "@sentry/tanstackstart-react": "^10.65.0",
     "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",

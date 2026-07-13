@@ -11,9 +11,13 @@ import { OrdersModule } from './orders/orders.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { PaymentsModule } from './payments/payments.module';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
+import { APP_FILTER } from '@nestjs/core';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [ 
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
     isGlobal: true,
   }),
@@ -26,8 +30,12 @@ import { PaymentsModule } from './payments/payments.module';
     WaitlistModule,
     PurchasesModule,
     PaymentsModule,
+    HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
+    },],
 })
 export class AppModule {}

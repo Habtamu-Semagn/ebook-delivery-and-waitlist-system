@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe'
 import { Queue } from 'bullmq';
@@ -9,6 +9,7 @@ export class WebhooksService {
     private stripe: Stripe;
     private supabase: SupabaseClient;
     private webhookSecret: string;
+    private readonly logger = new Logger(WebhooksService.name);
 
     constructor(
       private configService: ConfigService,
@@ -66,16 +67,16 @@ export class WebhooksService {
       // insert into webhook_events with status: 'pending'
     }
 
-    async processEvent(event: Stripe.Event): Promise<void> {
+    async processEvent(event: Stripe.Event, correlationId: string): Promise<void> {
         const alreadyProcessed = await this.isEventAlreadyProcessed(event.id);
         if (alreadyProcessed) {
-          console.log('Event already processed:', event.id);
+          this.logger.log(`[${correlationId}] Event already processed: ${event.id}`);
           return;
         }
         
         await this.saveEvent(event.id, event);
         
-        console.log('Adding job to queue for event:', event.id, event.type);
+        this.logger.log(`[${correlationId}] Adding job to queue for event: ${event.id} (${event.type})`);
 
         // Fire and forget - don't await queue operations to prevent webhook timeout
         // Stripe expects fast response (< 5s), queue job is added in background
@@ -83,6 +84,7 @@ export class WebhooksService {
           eventId: event.id,
           eventType: event.type,
           data: event.data,
+          correlationId
         }, {
           attempts: 5,
           backoff: {
@@ -91,11 +93,11 @@ export class WebhooksService {
           removeOnComplete: true,
           removeOnFail: false
         }).catch(err => {
-          console.error('Failed to add webhook job to queue:', err);
+          this.logger.error(`[${correlationId}] Failed to add webhook job to queue:`, err);
           // Log but don't throw - event is saved, queue operation can retry
         });
 
-        console.log('Job queued (async)');
+        this.logger.log(`[${correlationId}] Job queued (async)`);
       // 1. check isEventAlreadyProcessed(event.id) -> if true, return early
       // 2. call saveEvent(event.id, event)
       // 3. add job to webhookQueue with event data (fire & forget)
