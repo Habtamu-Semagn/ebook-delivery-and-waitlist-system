@@ -20,5 +20,9 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@nestjs/swagger": "^11.4.5",
+    "swagger-ui-express": "^5.0.1"
   }
 }
