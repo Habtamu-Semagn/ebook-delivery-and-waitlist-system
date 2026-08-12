@@ -39,11 +39,11 @@ export function FeaturedBooks() {
 
         {!loading && !error && books.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {books.map((book, index) => (
+            {books.slice(0, 3).map((book, index) => (
               <BookCard
                 key={book.id}
                 book={book}
-                badge={index === 0 ? 'bestseller' : index === 1 ? 'new' : undefined}
+                {...(index === 0 ? { badge: 'bestseller' as const } : index === 1 ? { badge: 'new' as const } : {})}
               />
             ))}
           </div>

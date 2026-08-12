@@ -24,6 +24,7 @@ export function Hero() {
 
   return (
     <section
+      id="hero"
       style={{
         background: 'linear-gradient(135deg, #020617 0%, #0a1628 50%, #0d1f2d 100%)',
       }}

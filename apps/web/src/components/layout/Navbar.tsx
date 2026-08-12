@@ -20,16 +20,29 @@ export function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {['Home', 'Categories', 'Books', 'About', 'Contact'].map((link) => (
+          {[
+            { label: 'Home', href: '#hero' },
+            { label: 'Categories', href: '#categories' },
+            { label: 'Books', href: '#featured' },
+            { label: 'About', href: '#about' },
+            { label: 'Contact', href: '#newsletter' }
+          ].map((link) => (
             <a
-              key={link}
-              href="#"
+              key={link.label}
+              href={link.href}
               className="text-sm no-underline transition-colors duration-200"
-              style={{ color: '#94A3B8' }}
+              style={{ color: '#94A3B8', scrollBehavior: 'smooth' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
               onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
+              onClick={(e) => {
+                e.preventDefault()
+                const element = document.querySelector(link.href)
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }}
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </div>

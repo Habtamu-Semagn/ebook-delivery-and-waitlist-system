@@ -111,43 +111,32 @@ export function BookCard({ book, badge }: BookCardProps) {
                 </span>
               </>
             )}
-
-            {badge && (
-              <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                <Badge variant={badge}>
-                  {badge === 'bestseller' ? 'Bestseller' : badge === 'new' ? 'New' : 'Sale'}
-                </Badge>
-              </div>
-            )}
           </div>
 
           {/* Body */}
           <div className="p-5">
             <div
-              className="font-medium text-sm mb-1 truncate"
+              className="font-medium text-sm mb-1 truncate tracking-widest"
               style={{ color: '#FFFFFF' }}
             >
               {book.title}
             </div>
-            <div className="text-xs mb-4" style={{ color: '#94A3B8' }}>
+            <div className="text-xs mb-4 tracking-wide" style={{ color: '#94A3B8' }}>
               {book.author}
             </div>
             <div className="flex items-center justify-between mb-4">
               <span className="font-medium text-base" style={{ color: '#10B981' }}>
                 ${(book.price / 100).toFixed(2)}
               </span>
-              <span className="text-xs" style={{ color: '#FBBF24' }}>
-                ★★★★★
-              </span>
             </div>
           </div>
-        </div>
-      </Link>
       <div style={{ padding: '0 20px 20px 20px', marginTop: '-14px' }}>
         <Button variant="primary" size="sm" fullWidth onClick={handleBuy}>
           Buy now
         </Button>
       </div>
+        </div>
+      </Link>
     </div>
   )
 }
