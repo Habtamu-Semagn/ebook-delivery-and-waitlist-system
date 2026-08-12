@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchBooks } from '../lib/api'
-
-export interface Book {
-  id: string
-  title: string
-  description: string
-  price: number
-  author: string
-  is_active: boolean
-}
+import { Book } from '../lib/types'
 
 export function useBooks() {
   const [books, setBooks] = useState<Book[]>([])

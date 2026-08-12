@@ -107,13 +107,20 @@ function BookDetailPage() {
     )
   }
 
-  const coverIndex = book.title.charCodeAt(0) % covers.length
-  const initials = book.title
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
+  const coverIndex = book?.title ? book.title.charCodeAt(0) % covers.length : 0
+  const initials = book?.title
+    ? book.title
+        .split(' ')
+        .slice(0, 2)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+    : 'N/A'
+
+  // Generate image URL from Supabase storage if image_url exists
+  const imageUrl = book?.image_url 
+    ? `http://localhost:54321/storage/v1/object/public/book-images/${book.image_url}`
+    : null
 
   return (
     <main style={{ background: '#020617', minHeight: '100vh' }}>
@@ -150,7 +157,7 @@ function BookDetailPage() {
             <div className="md:col-span-1">
               <div
                 style={{
-                  background: covers[coverIndex],
+                  background: imageUrl ? 'transparent' : covers[coverIndex],
                   borderRadius: '16px',
                   aspectRatio: '3/4',
                   display: 'flex',
@@ -160,19 +167,34 @@ function BookDetailPage() {
                   gap: '12px',
                   boxShadow: '0 20px 60px rgba(16, 185, 129, 0.15)',
                   border: '1px solid rgba(16, 185, 129, 0.2)',
+                  overflow: 'hidden',
                 }}
               >
-                <BookOpen size={48} color="rgba(255,255,255,0.3)" />
-                <span
-                  style={{
-                    color: 'rgba(255,255,255,0.85)',
-                    fontSize: '32px',
-                    fontWeight: '700',
-                    letterSpacing: '2px',
-                  }}
-                >
-                  {initials}
-                </span>
+                {imageUrl ? (
+                  <img 
+                    src={imageUrl} 
+                    alt={book.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <>
+                    <BookOpen size={48} color="rgba(255,255,255,0.3)" />
+                    <span
+                      style={{
+                        color: 'rgba(255,255,255,0.85)',
+                        fontSize: '32px',
+                        fontWeight: '700',
+                        letterSpacing: '2px',
+                      }}
+                    >
+                      {initials}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 

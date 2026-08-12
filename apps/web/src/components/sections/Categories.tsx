@@ -10,14 +10,15 @@ import {
 } from 'lucide-react'
 
 const categories = [
-  { icon: Code2, name: 'Programming', count: '1,240' },
-  { icon: Brain, name: 'Artificial Intelligence', count: '830' },
-  { icon: TrendingUp, name: 'Business', count: '720' },
-  { icon: DollarSign, name: 'Finance', count: '540' },
-  { icon: Sprout, name: 'Self Development', count: '910' },
-  { icon: Palette, name: 'Design', count: '450' },
-  { icon: GraduationCap, name: 'Education', count: '680' },
-  { icon: BookOpen, name: 'Fiction', count: '1,100' },
+  { icon: Code2, name: 'Programming', slug: 'programming', count: '1,240' },
+  { icon: Brain, name: 'Artificial Intelligence', slug: 'ai', count: '830' },
+  { icon: TrendingUp, name: 'Business', slug: 'business', count: '720' },
+  { icon: DollarSign, name: 'Finance', slug: 'finance', count: '540' },
+  { icon: Sprout, name: 'Self Development', slug: 'self-development', count: '910' },
+  { icon: Palette, name: 'Design', slug: 'design', count: '450' },
+  { icon: GraduationCap, name: 'Education', slug: 'education', count: '680' },
+  { icon: BookOpen, name: 'Fiction', slug: 'fiction', count: '1,100' },
+  { icon: BookOpen, name: 'Other', slug: 'other', count: '320' },
 ]
 
 export function Categories() {
@@ -44,8 +45,9 @@ export function Categories() {
           {categories.map((cat) => {
             const Icon = cat.icon
             return (
-              <div
+              <a
                 key={cat.name}
+                href={`/books/category/${cat.slug}`}
                 style={{
                   background: '#1E293B',
                   border: '1px solid #334155',
@@ -53,6 +55,8 @@ export function Categories() {
                   boxShadow: '0 10px 40px rgba(0,0,0,.35)',
                   cursor: 'pointer',
                   transition: 'all 0.25s',
+                  display: 'block',
+                  textDecoration: 'none',
                 }}
                 className="p-6"
                 onMouseEnter={(e) => {
@@ -86,7 +90,7 @@ export function Categories() {
                 <div className="text-xs" style={{ color: '#64748B' }}>
                   {cat.count} books
                 </div>
-              </div>
+              </a>
             )
           })}
         </div>

@@ -1,9 +1,10 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { useRouterState } from '@tanstack/react-router'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
-import { Toaster } from '../components/ui/sonner' // 👈 Added Toaster import
+import { Toaster } from '../components/ui/sonner'
 
 import appCss from '../styles.css?url'
 
@@ -22,17 +23,19 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const routerState = useRouterState()
+  const isAdminRoute = routerState.location.pathname.startsWith('/admin')
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        <Navbar />
+        {!isAdminRoute && <Navbar />}
         {children}
-        <Footer />
+        {!isAdminRoute && <Footer />}
         
-        {/* 👇 Renders toast notifications cleanly on top of all pages */}
         <Toaster position="top-right" richColors />
 
         <TanStackDevtools

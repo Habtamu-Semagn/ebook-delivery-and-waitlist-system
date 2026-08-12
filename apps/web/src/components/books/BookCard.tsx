@@ -4,7 +4,7 @@ import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 import { createOrder } from '../../lib/api'
-import type { Book } from '../../hooks/useBooks'
+import type { Book } from '../../lib/types'
 
 interface BookCardProps {
   book: Book
@@ -43,6 +43,11 @@ export function BookCard({ book, badge }: BookCardProps) {
     .join('')
     .toUpperCase()
 
+  // Generate image URL from Supabase storage if image_url exists
+  const imageUrl = book.image_url 
+    ? `http://localhost:54321/storage/v1/object/public/book-images/${book.image_url}`
+    : null
+
   return (
     <div>
       <Link to="/books/$bookId" params={{ bookId: book.id }} style={{ textDecoration: 'none' }}>
@@ -70,7 +75,7 @@ export function BookCard({ book, badge }: BookCardProps) {
           {/* Cover */}
           <div
             style={{
-              background: covers[coverIndex],
+              background: imageUrl ? 'transparent' : covers[coverIndex],
               height: '180px',
               display: 'flex',
               flexDirection: 'column',
@@ -78,19 +83,34 @@ export function BookCard({ book, badge }: BookCardProps) {
               justifyContent: 'center',
               position: 'relative',
               gap: '8px',
+              overflow: 'hidden',
             }}
           >
-            <BookOpen size={32} color="rgba(255,255,255,0.3)" />
-            <span
-              style={{
-                color: 'rgba(255,255,255,0.85)',
-                fontSize: '22px',
-                fontWeight: '600',
-                letterSpacing: '2px',
-              }}
-            >
-              {initials}
-            </span>
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={book.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              <>
+                <BookOpen size={32} color="rgba(255,255,255,0.3)" />
+                <span
+                  style={{
+                    color: 'rgba(255,255,255,0.85)',
+                    fontSize: '22px',
+                    fontWeight: '600',
+                    letterSpacing: '2px',
+                  }}
+                >
+                  {initials}
+                </span>
+              </>
+            )}
 
             {badge && (
               <div style={{ position: 'absolute', top: '10px', left: '10px' }}>

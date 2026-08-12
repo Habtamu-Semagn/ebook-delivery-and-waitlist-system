@@ -14,6 +14,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { APP_FILTER } from '@nestjs/core';
 import { HealthModule } from './health/health.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [ 
@@ -31,6 +32,7 @@ import { HealthModule } from './health/health.module';
     PurchasesModule,
     PaymentsModule,
     HealthModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, {

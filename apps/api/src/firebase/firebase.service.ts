@@ -11,7 +11,7 @@ export class FirebaseService implements OnModuleInit {
 
     onModuleInit() {
         const existingApps = getApps();
-        if(getApps().length === 0) {
+        if(existingApps.length === 0) {
             this.app = initializeApp({
                 credential: cert({
                     projectId: this.configService.getOrThrow<string>('FIREBASE_PROJECT_ID'),
