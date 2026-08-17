@@ -42,7 +42,7 @@ const features = [
 
 export function WhyChooseUs() {
   return (
-    <section style={{ background: '#0F172A' }} className="px-6 py-20">
+    <section id="about" style={{ background: '#0F172A' }} className="px-6 py-20">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <h2

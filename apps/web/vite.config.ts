@@ -20,6 +20,13 @@ const config = defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
       'Cross-Origin-Embedder-Policy': 'unsafe-none',
     },
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_URL || 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
 })
 

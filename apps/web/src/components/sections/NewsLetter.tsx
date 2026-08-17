@@ -22,6 +22,7 @@ export function Newsletter() {
 
   return (
     <section
+      id="newsletter"
       style={{
         background: 'linear-gradient(135deg, #064E3B, #065F46, #022C22)',
         position: 'relative',

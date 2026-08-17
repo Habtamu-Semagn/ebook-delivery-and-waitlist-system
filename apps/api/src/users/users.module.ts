@@ -6,6 +6,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
 @Module({
   imports: [FirebaseModule],
   providers: [UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController],
+  exports: [UsersService]
 })
 export class UsersModule {}

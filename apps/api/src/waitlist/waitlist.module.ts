@@ -7,6 +7,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
 @Module({
   imports: [EmailModule, FirebaseModule],
   controllers: [WaitlistController],
-  providers: [WaitlistService]
+  providers: [WaitlistService],
+  exports: [WaitlistService]
 })
 export class WaitlistModule {}

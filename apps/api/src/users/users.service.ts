@@ -20,7 +20,7 @@ export class UsersService {
     }
 
     async syncUser(firebaseUid: string, email: string) {
-        const {data: existingUser } = await this.supabase.from('users').select('id').eq('firebase_id', firebaseUid).maybeSingle();
+        const {data: existingUser } = await this.supabase.from('users').select('id').eq('firebase_uid', firebaseUid).maybeSingle();
         console.log("existing user: ", existingUser)
         if(existingUser){
             return existingUser;
@@ -34,5 +34,32 @@ export class UsersService {
         }
 
         return newUser;
+    }
+
+    async getAllUsers() {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('id, email, firebase_uid, created_at')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw new Error(`Failed to fetch users: ${error.message}`);
+        }
+
+        return data || [];
+    }
+
+    async getUserStats() {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('id', { count: 'exact' });
+
+        if (error) {
+            throw new Error(`Failed to fetch user count: ${error.message}`);
+        }
+
+        return {
+            totalUsers: data?.length || 0,
+        };
     }
 }

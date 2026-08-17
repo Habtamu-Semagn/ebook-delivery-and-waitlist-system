@@ -1,12 +1,17 @@
-import { Controller, Get, Req, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Param, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PurchasesService } from './purchases.service';
 import { FirebaseAuthGuard } from 'src/guards/firebase-auth.guard';
+import { AdminGuard } from 'src/guards/admin.guard';
+import { EmailService } from 'src/email/email.service';
 
 @ApiTags('Purchases')
 @Controller('purchases')
 export class PurchasesController {
-    constructor(private purchasesService: PurchasesService) {}
+    constructor(
+        private purchasesService: PurchasesService,
+        private emailService: EmailService,
+    ) {}
 
     @Get()
     @UseGuards(FirebaseAuthGuard)
@@ -28,5 +33,16 @@ export class PurchasesController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     async getDownloadUrl(@Req() req: any, @Param('bookId') bookId: string) {
         return this.purchasesService.getDownloadUrl(req.user.uid, bookId);
+    }
+
+    @Post(':purchaseId/resend-email')
+    @UseGuards(AdminGuard)
+    @ApiBearerAuth('Firebase')
+    @ApiOperation({ summary: 'Resend purchase confirmation email' })
+    @ApiResponse({ status: 200, description: 'Email resent successfully' })
+    @ApiResponse({ status: 404, description: 'Purchase not found' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    async resendEmail(@Param('purchaseId') purchaseId: string) {
+        return this.purchasesService.resendConfirmationEmail(purchaseId);
     }
 }

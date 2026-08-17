@@ -10,14 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuccessRouteImport } from './routes/success'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PurchasesRouteImport } from './routes/purchases'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as BooksBookIdRouteImport } from './routes/books/$bookId'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminWebhooksIndexRouteImport } from './routes/admin/webhooks/index'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminPurchasesIndexRouteImport } from './routes/admin/purchases/index'
+import { Route as AdminBooksIndexRouteImport } from './routes/admin/books/index'
+import { Route as BooksCategoryCategoryRouteImport } from './routes/books/category/$category'
+import { Route as AdminPurchasesPurchaseIdRouteImport } from './routes/admin/purchases/$purchaseId'
 
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PurchasesRoute = PurchasesRouteImport.update({
@@ -30,53 +45,176 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const BooksBookIdRoute = BooksBookIdRouteImport.update({
   id: '/books/$bookId',
   path: '/books/$bookId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminWebhooksIndexRoute = AdminWebhooksIndexRouteImport.update({
+  id: '/webhooks/',
+  path: '/webhooks/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPurchasesIndexRoute = AdminPurchasesIndexRouteImport.update({
+  id: '/purchases/',
+  path: '/purchases/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBooksIndexRoute = AdminBooksIndexRouteImport.update({
+  id: '/books/',
+  path: '/books/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const BooksCategoryCategoryRoute = BooksCategoryCategoryRouteImport.update({
+  id: '/books/category/$category',
+  path: '/books/category/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPurchasesPurchaseIdRoute =
+  AdminPurchasesPurchaseIdRouteImport.update({
+    id: '/purchases/$purchaseId',
+    path: '/purchases/$purchaseId',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/purchases': typeof PurchasesRoute
+  '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/purchases/$purchaseId': typeof AdminPurchasesPurchaseIdRoute
+  '/books/category/$category': typeof BooksCategoryCategoryRoute
+  '/admin/books/': typeof AdminBooksIndexRoute
+  '/admin/purchases/': typeof AdminPurchasesIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/webhooks/': typeof AdminWebhooksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/purchases': typeof PurchasesRoute
+  '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/purchases/$purchaseId': typeof AdminPurchasesPurchaseIdRoute
+  '/books/category/$category': typeof BooksCategoryCategoryRoute
+  '/admin/books': typeof AdminBooksIndexRoute
+  '/admin/purchases': typeof AdminPurchasesIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/webhooks': typeof AdminWebhooksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/purchases': typeof PurchasesRoute
+  '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/purchases/$purchaseId': typeof AdminPurchasesPurchaseIdRoute
+  '/books/category/$category': typeof BooksCategoryCategoryRoute
+  '/admin/books/': typeof AdminBooksIndexRoute
+  '/admin/purchases/': typeof AdminPurchasesIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/webhooks/': typeof AdminWebhooksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/purchases' | '/success' | '/books/$bookId'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/purchases'
+    | '/signup'
+    | '/success'
+    | '/admin/settings'
+    | '/books/$bookId'
+    | '/admin/'
+    | '/admin/purchases/$purchaseId'
+    | '/books/category/$category'
+    | '/admin/books/'
+    | '/admin/purchases/'
+    | '/admin/users/'
+    | '/admin/webhooks/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/purchases' | '/success' | '/books/$bookId'
-  id: '__root__' | '/' | '/login' | '/purchases' | '/success' | '/books/$bookId'
+  to:
+    | '/'
+    | '/login'
+    | '/purchases'
+    | '/signup'
+    | '/success'
+    | '/admin/settings'
+    | '/books/$bookId'
+    | '/admin'
+    | '/admin/purchases/$purchaseId'
+    | '/books/category/$category'
+    | '/admin/books'
+    | '/admin/purchases'
+    | '/admin/users'
+    | '/admin/webhooks'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/purchases'
+    | '/signup'
+    | '/success'
+    | '/admin/settings'
+    | '/books/$bookId'
+    | '/admin/'
+    | '/admin/purchases/$purchaseId'
+    | '/books/category/$category'
+    | '/admin/books/'
+    | '/admin/purchases/'
+    | '/admin/users/'
+    | '/admin/webhooks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   PurchasesRoute: typeof PurchasesRoute
+  SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
   BooksBookIdRoute: typeof BooksBookIdRoute
+  BooksCategoryCategoryRoute: typeof BooksCategoryCategoryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -86,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/success'
       fullPath: '/success'
       preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/purchases': {
@@ -102,12 +247,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/books/$bookId': {
       id: '/books/$bookId'
@@ -116,15 +275,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksBookIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/webhooks/': {
+      id: '/admin/webhooks/'
+      path: '/webhooks'
+      fullPath: '/admin/webhooks/'
+      preLoaderRoute: typeof AdminWebhooksIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/purchases/': {
+      id: '/admin/purchases/'
+      path: '/purchases'
+      fullPath: '/admin/purchases/'
+      preLoaderRoute: typeof AdminPurchasesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/books/': {
+      id: '/admin/books/'
+      path: '/books'
+      fullPath: '/admin/books/'
+      preLoaderRoute: typeof AdminBooksIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/books/category/$category': {
+      id: '/books/category/$category'
+      path: '/books/category/$category'
+      fullPath: '/books/category/$category'
+      preLoaderRoute: typeof BooksCategoryCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/purchases/$purchaseId': {
+      id: '/admin/purchases/$purchaseId'
+      path: '/purchases/$purchaseId'
+      fullPath: '/admin/purchases/$purchaseId'
+      preLoaderRoute: typeof AdminPurchasesPurchaseIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminPurchasesPurchaseIdRoute: typeof AdminPurchasesPurchaseIdRoute
+  AdminBooksIndexRoute: typeof AdminBooksIndexRoute
+  AdminPurchasesIndexRoute: typeof AdminPurchasesIndexRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+  AdminWebhooksIndexRoute: typeof AdminWebhooksIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminPurchasesPurchaseIdRoute: AdminPurchasesPurchaseIdRoute,
+  AdminBooksIndexRoute: AdminBooksIndexRoute,
+  AdminPurchasesIndexRoute: AdminPurchasesIndexRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+  AdminWebhooksIndexRoute: AdminWebhooksIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   PurchasesRoute: PurchasesRoute,
+  SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
   BooksBookIdRoute: BooksBookIdRoute,
+  BooksCategoryCategoryRoute: BooksCategoryCategoryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

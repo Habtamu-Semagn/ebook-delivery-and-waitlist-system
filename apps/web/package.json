@@ -17,7 +17,9 @@
     "check": "prettier --check ."
   },
   "dependencies": {
+    "@base-ui/react": "^1.6.0",
     "@ebook/shared-types": "workspace:*",
+    "@fontsource-variable/geist": "^5.3.0",
     "@nestjs/config": "^4.0.4",
     "@sentry/tanstackstart-react": "^10.65.0",
     "@supabase/supabase-js": "^2.108.2",
@@ -36,6 +38,7 @@
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "shadcn": "^4.16.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.1.18",

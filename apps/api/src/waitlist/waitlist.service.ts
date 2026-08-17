@@ -55,4 +55,10 @@ export class WaitlistService {
 
         return { count };
     }
+
+    async getTotalCount() {
+        const { count } = await this.supabase.from('waitlist').select('*', { count: 'exact', head: true });
+
+        return count || 0;
+    }
 }

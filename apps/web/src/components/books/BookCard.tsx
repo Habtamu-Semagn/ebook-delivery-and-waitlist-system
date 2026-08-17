@@ -1,14 +1,13 @@
 import { BookOpen } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 import { createOrder } from '../../lib/api'
-import type { Book } from '../../hooks/useBooks'
+import { getBookImageUrl } from '../../lib/supabase'
+import type { Book } from '../../lib/types'
 
 interface BookCardProps {
   book: Book
-  badge?: 'bestseller' | 'new' | 'sale'
 }
 
 const covers = [
@@ -19,7 +18,7 @@ const covers = [
   'linear-gradient(135deg, #3b1f1f, #5c2a2a)',
 ]
 
-export function BookCard({ book, badge }: BookCardProps) {
+export function BookCard({ book }: BookCardProps) {
   const { user, getToken } = useAuth()
 
   const handleBuy = async () => {
@@ -42,6 +41,9 @@ export function BookCard({ book, badge }: BookCardProps) {
     .map((w) => w[0])
     .join('')
     .toUpperCase()
+
+  // Generate image URL from Supabase storage if image_url exists
+  const imageUrl = getBookImageUrl(book.image_url)
 
   return (
     <div>
@@ -70,7 +72,7 @@ export function BookCard({ book, badge }: BookCardProps) {
           {/* Cover */}
           <div
             style={{
-              background: covers[coverIndex],
+              background: imageUrl ? 'transparent' : covers[coverIndex],
               height: '180px',
               display: 'flex',
               flexDirection: 'column',
@@ -78,56 +80,60 @@ export function BookCard({ book, badge }: BookCardProps) {
               justifyContent: 'center',
               position: 'relative',
               gap: '8px',
+              overflow: 'hidden',
             }}
           >
-            <BookOpen size={32} color="rgba(255,255,255,0.3)" />
-            <span
-              style={{
-                color: 'rgba(255,255,255,0.85)',
-                fontSize: '22px',
-                fontWeight: '600',
-                letterSpacing: '2px',
-              }}
-            >
-              {initials}
-            </span>
-
-            {badge && (
-              <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                <Badge variant={badge}>
-                  {badge === 'bestseller' ? 'Bestseller' : badge === 'new' ? 'New' : 'Sale'}
-                </Badge>
-              </div>
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={book.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              <>
+                <BookOpen size={32} color="rgba(255,255,255,0.3)" />
+                <span
+                  style={{
+                    color: 'rgba(255,255,255,0.85)',
+                    fontSize: '22px',
+                    fontWeight: '600',
+                    letterSpacing: '2px',
+                  }}
+                >
+                  {initials}
+                </span>
+              </>
             )}
           </div>
 
           {/* Body */}
           <div className="p-5">
             <div
-              className="font-medium text-sm mb-1 truncate"
+              className="font-medium text-sm mb-1 truncate tracking-widest"
               style={{ color: '#FFFFFF' }}
             >
               {book.title}
             </div>
-            <div className="text-xs mb-4" style={{ color: '#94A3B8' }}>
+            <div className="text-xs mb-4 tracking-wide" style={{ color: '#94A3B8' }}>
               {book.author}
             </div>
             <div className="flex items-center justify-between mb-4">
               <span className="font-medium text-base" style={{ color: '#10B981' }}>
                 ${(book.price / 100).toFixed(2)}
               </span>
-              <span className="text-xs" style={{ color: '#FBBF24' }}>
-                ★★★★★
-              </span>
             </div>
           </div>
-        </div>
-      </Link>
       <div style={{ padding: '0 20px 20px 20px', marginTop: '-14px' }}>
         <Button variant="primary" size="sm" fullWidth onClick={handleBuy}>
           Buy now
         </Button>
       </div>
+        </div>
+      </Link>
     </div>
   )
 }

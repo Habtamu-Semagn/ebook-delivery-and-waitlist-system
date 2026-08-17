@@ -16,12 +16,21 @@ function LoginPage() {
     const [loading, setLoading] = useState<boolean>(false);
 
     const syncUserWithBackend = async (token: string) => {
-        await fetch('http://localhost:3002/users/sync', {
+        await fetch('/api/users/sync', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
         })
+    }
+
+    const getRedirectPath = async (user: any): Promise<string> => {
+        const tokenResult = await user.getIdTokenResult(true);
+        if (tokenResult.claims.admin === true) {
+            return '/admin';
+        }
+        return '/';
     }
 
     const handleEmailLogin = async (e: React.FormEvent) => {
@@ -32,7 +41,8 @@ function LoginPage() {
           const result = await signInWithEmailAndPassword(auth, email, password);
           const token = await result.user.getIdToken();
           await syncUserWithBackend(token);
-          window.location.href = '/';
+          const redirectPath = await getRedirectPath(result.user);
+          window.location.href = redirectPath;
         } catch (err: any) {
           setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
@@ -49,7 +59,8 @@ function LoginPage() {
           const result = await signInWithPopup(auth, provider);
           const token = await result.user.getIdToken();
           await syncUserWithBackend(token);
-          window.location.href = '/';
+          const redirectPath = await getRedirectPath(result.user);
+          window.location.href = redirectPath;
         } catch (err: any) {
           console.error('Google login error: ', err)
           setError(err instanceof Error ? err.message : 'An error occurred');
@@ -249,7 +260,7 @@ function LoginPage() {
                     {/* Sign up link */}
                     <p style={{ color: '#94A3B8' }} className="text-sm text-center mt-6">
                         Don't have an account?{' '}
-                        <a href="#" style={{ color: '#10B981' }} className="font-medium hover:underline">
+                        <a href="/signup" style={{ color: '#10B981' }} className="font-medium hover:underline">
                             Create one
                         </a>
                     </p>

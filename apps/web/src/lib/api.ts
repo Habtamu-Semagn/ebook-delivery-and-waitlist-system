@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3002'
+const API_URL = '/api'
 
 export async function fetchBooks() {
   const res = await fetch(`${API_URL}/books`)
@@ -9,6 +9,12 @@ export async function fetchBooks() {
 export async function fetchBookById(bookId: string) {
   const res = await fetch(`${API_URL}/books/${bookId}`)
   if (!res.ok) throw new Error('Failed to fetch book')
+  return res.json()
+}
+
+export async function fetchBooksByCategory(category: string) {
+  const res = await fetch(`${API_URL}/books/category/${category}`)
+  if (!res.ok) throw new Error('Failed to fetch books by category')
   return res.json()
 }
 
