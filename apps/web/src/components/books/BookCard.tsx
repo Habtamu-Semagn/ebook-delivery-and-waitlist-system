@@ -1,14 +1,13 @@
 import { BookOpen } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 import { createOrder } from '../../lib/api'
+import { getBookImageUrl } from '../../lib/supabase'
 import type { Book } from '../../lib/types'
 
 interface BookCardProps {
   book: Book
-  badge?: 'bestseller' | 'new' | 'sale'
 }
 
 const covers = [
@@ -19,7 +18,7 @@ const covers = [
   'linear-gradient(135deg, #3b1f1f, #5c2a2a)',
 ]
 
-export function BookCard({ book, badge }: BookCardProps) {
+export function BookCard({ book }: BookCardProps) {
   const { user, getToken } = useAuth()
 
   const handleBuy = async () => {
@@ -44,9 +43,7 @@ export function BookCard({ book, badge }: BookCardProps) {
     .toUpperCase()
 
   // Generate image URL from Supabase storage if image_url exists
-  const imageUrl = book.image_url 
-    ? `http://localhost:54321/storage/v1/object/public/book-images/${book.image_url}`
-    : null
+  const imageUrl = getBookImageUrl(book.image_url)
 
   return (
     <div>

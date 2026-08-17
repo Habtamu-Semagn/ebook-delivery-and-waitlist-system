@@ -6,6 +6,7 @@ import { Book } from '#/lib/types'
 import { fetchBooksByCategory } from '#/lib/api'
 import { useAuth } from '#/hooks/useAuth'
 import { createOrder } from '#/lib/api'
+import { getBookImageUrl } from '#/lib/supabase'
 
 const CATEGORY_NAMES: Record<string, string> = {
   'programming': 'Programming',
@@ -60,9 +61,7 @@ function HorizontalBookItem({ book }: { book: Book }) {
     .join('')
     .toUpperCase()
 
-  const imageUrl = book.image_url 
-    ? `http://localhost:54321/storage/v1/object/public/book-images/${book.image_url}`
-    : null
+  const imageUrl = getBookImageUrl(book.image_url)
 
   return (
     <div

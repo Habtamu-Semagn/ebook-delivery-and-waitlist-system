@@ -15,7 +15,7 @@ const customDelays = [
 
 @Processor('webhook-events', {
   settings: {
-    backoffStrategy: (attemptsMade: number, type?: string, err?: Error, job?: Job): number => {
+    backoffStrategy: (attemptsMade: number, type?: string): number => {
       if (type === 'custom') {
         const index = Math.min(attemptsMade - 1, customDelays.length - 1);
         return customDelays[index] ?? 1_000;
@@ -53,6 +53,12 @@ export class WebhooksProcessor extends WorkerHost {
       switch(eventType) {
           case 'checkout.session.completed':
             await this.handlePaymentSucceeded(data, correlationId);
+            break;
+          case 'charge.succeeded':
+            await this.handleChargeSucceeded(data, correlationId);
+            break;
+          case 'charge.updated':
+            await this.handleChargeUpdated(data, correlationId);
             break;
           case 'payment_intent.payment_failed':
               await this.handlePaymentFailed(data, correlationId);
@@ -158,6 +164,130 @@ export class WebhooksProcessor extends WorkerHost {
     }
     // update purchases table: status = 'completed'
     // (later: trigger confirmation email - Day 5)
+  }
+
+  private async handleChargeSucceeded(data: any, correlationId: string): Promise<void> {
+    const chargeId = data.object.id;
+    const paymentIntentId = data.object.payment_intent;
+    
+    this.logger.log(`[${correlationId}] Processing charge succeeded: ${chargeId}, Payment Intent: ${paymentIntentId}`);
+
+    // Try to find purchase by payment_intent_id (stored in payment_order_id or a dedicated column)
+    const { data: purchase, error: fetchError } = await this.supabase
+      .from('purchases')
+      .select('*, users(email), books(title, file_url)')
+      .eq('payment_order_id', paymentIntentId)
+      .maybeSingle();
+
+    if (fetchError) {
+      this.logger.warn(`[${correlationId}] Could not find purchase for payment intent: ${paymentIntentId}`);
+      return; // Not an error - might be handled by checkout.session.completed
+    }
+
+    if (!purchase) {
+      this.logger.log(`[${correlationId}] No purchase found for this charge - likely already processed`);
+      return;
+    }
+
+    // Update status to completed
+    const { error: updateError } = await this.supabase
+      .from('purchases')
+      .update({ status: 'completed' })
+      .eq('id', purchase.id);
+
+    if (updateError) {
+      throw new Error(`Failed to update purchase status: ${updateError.message}`);
+    }
+
+    // Send email if not already sent
+    if (purchase?.users?.email && purchase?.books?.title) {
+      const { data: signedUrl, error: urlError } = await this.supabase.storage
+        .from('ebooks')
+        .createSignedUrl(purchase.books.file_url, 60 * 60 * 24);
+
+      if (urlError) {
+        throw new Error(`Failed to create signed URL for ebook: ${urlError.message}`);
+      }
+
+      const downloadUrl = signedUrl?.signedUrl ?? purchase.books.file_url;
+
+      await this.emailService.sendPurchaseConfirmation(
+        purchase.users.email,
+        purchase.books.title,
+        downloadUrl,
+      );
+      
+      this.logger.log(`[${correlationId}] Purchase confirmation email sent to: ${purchase.users.email}`);
+    }
+  }
+
+  private async handleChargeUpdated(data: any, correlationId: string): Promise<void> {
+    const chargeId = data.object.id;
+    const paymentIntentId = data.object.payment_intent;
+    const status = data.object.status;
+    const paid = data.object.paid;
+    
+    this.logger.log(`[${correlationId}] Processing charge updated: ${chargeId}, Status: ${status}, Paid: ${paid}`);
+
+    // Only process if the charge is successful and paid
+    if (status !== 'succeeded' || !paid) {
+      this.logger.log(`[${correlationId}] Charge not yet successful (status: ${status}, paid: ${paid}). Skipping.`);
+      return;
+    }
+
+    // Try to find purchase by payment_intent_id
+    const { data: purchase, error: fetchError } = await this.supabase
+      .from('purchases')
+      .select('*, users(email), books(title, file_url)')
+      .eq('payment_order_id', paymentIntentId)
+      .maybeSingle();
+
+    if (fetchError) {
+      this.logger.warn(`[${correlationId}] Could not find purchase for payment intent: ${paymentIntentId}`);
+      return;
+    }
+
+    if (!purchase) {
+      this.logger.log(`[${correlationId}] No purchase found for this charge`);
+      return;
+    }
+
+    // Check if already completed to avoid duplicate emails
+    if (purchase.status === 'completed') {
+      this.logger.log(`[${correlationId}] Purchase already completed. Skipping.`);
+      return;
+    }
+
+    // Update status to completed
+    const { error: updateError } = await this.supabase
+      .from('purchases')
+      .update({ status: 'completed' })
+      .eq('id', purchase.id);
+
+    if (updateError) {
+      throw new Error(`Failed to update purchase status: ${updateError.message}`);
+    }
+
+    // Send email
+    if (purchase?.users?.email && purchase?.books?.title) {
+      const { data: signedUrl, error: urlError } = await this.supabase.storage
+        .from('ebooks')
+        .createSignedUrl(purchase.books.file_url, 60 * 60 * 24);
+
+      if (urlError) {
+        throw new Error(`Failed to create signed URL for ebook: ${urlError.message}`);
+      }
+
+      const downloadUrl = signedUrl?.signedUrl ?? purchase.books.file_url;
+
+      await this.emailService.sendPurchaseConfirmation(
+        purchase.users.email,
+        purchase.books.title,
+        downloadUrl,
+      );
+      
+      this.logger.log(`[${correlationId}] Purchase confirmation email sent to: ${purchase.users.email}`);
+    }
   }
 
   private async handlePaymentFailed(data: any, correlationId: string): Promise<void> {

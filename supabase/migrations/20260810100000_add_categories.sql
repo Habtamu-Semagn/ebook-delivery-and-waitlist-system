@@ -51,5 +51,15 @@ CREATE INDEX IF NOT EXISTS idx_books_category ON books(category);
 -- Add RLS policy for categories table (read-only for public)
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable read access for all users" ON categories
-  FOR SELECT USING (true);
+-- Create policy only if it doesn't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'categories' 
+    AND policyname = 'Enable read access for all users'
+  ) THEN
+    CREATE POLICY "Enable read access for all users" ON categories
+      FOR SELECT USING (true);
+  END IF;
+END $$;

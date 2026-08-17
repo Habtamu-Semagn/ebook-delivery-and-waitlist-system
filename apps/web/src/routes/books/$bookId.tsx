@@ -4,6 +4,7 @@ import { BookOpen, ArrowLeft, AlertCircle } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 import { createOrder, fetchBookById } from '../../lib/api'
+import { getBookImageUrl } from '../../lib/supabase'
 
 export const Route = createFileRoute('/books/$bookId')({
   component: BookDetailPage,
@@ -17,6 +18,7 @@ interface BookDetail {
   category: string
   price: number
   rating?: number
+  image_url?: string
 }
 
 const covers = [
@@ -118,9 +120,7 @@ function BookDetailPage() {
     : 'N/A'
 
   // Generate image URL from Supabase storage if image_url exists
-  const imageUrl = book?.image_url 
-    ? `http://localhost:54321/storage/v1/object/public/book-images/${book.image_url}`
-    : null
+  const imageUrl = getBookImageUrl(book?.image_url)
 
   return (
     <main style={{ background: '#020617', minHeight: '100vh' }}>
