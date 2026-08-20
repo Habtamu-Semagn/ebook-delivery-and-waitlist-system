@@ -1,0 +1,26 @@
+{
+  "buildCommand": "cd apps/web && pnpm run build",
+  "outputDirectory": "apps/web/dist/client",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": null,
+  "regions": ["iad1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
