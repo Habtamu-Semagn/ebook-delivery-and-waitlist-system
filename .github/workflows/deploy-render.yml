@@ -1,0 +1,34 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-api:
+    name: Deploy API to Render
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Render API Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
+      
+      - name: Wait for deployment
+        run: sleep 60
+      
+      - name: Health check
+        run: |
+          curl -f ${{ secrets.API_URL }}/health || exit 1
+
+  deploy-web:
+    name: Deploy Web to Render
+    runs-on: ubuntu-latest
+    needs: deploy-api
+    if: secrets.RENDER_DEPLOY_HOOK_WEB != ''
+    
+    steps:
+      - name: Trigger Render Web Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB }}"
