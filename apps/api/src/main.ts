@@ -32,9 +32,25 @@ async function bootstrap() {
     .build();
   
   const document = SwaggerModule.createDocument(app, config);
+  
+  // Add servers based on environment
+  if (process.env.NODE_ENV === 'production' && process.env.API_URL) {
+    document.servers = [
+      { url: process.env.API_URL, description: 'Production' },
+      { url: 'http://localhost:3002', description: 'Local Development' }
+    ];
+  }
+  
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(3002);
-  console.log('Swagger docs available at http://localhost:3002/api/docs');
+  const port = process.env.PORT || 3002;
+  await app.listen(port);
+  
+  // Determine the base URL for Swagger docs
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? process.env.API_URL || `https://your-api-name.onrender.com`
+    : `http://localhost:${port}`;
+  
+  console.log(`Swagger docs available at ${baseUrl}/api/docs`);
 }
 bootstrap();

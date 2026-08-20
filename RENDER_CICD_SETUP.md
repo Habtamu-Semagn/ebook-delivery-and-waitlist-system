@@ -279,6 +279,9 @@ This means Firebase environment variables are missing or incorrectly formatted.
 NODE_ENV=production
 PORT=3002
 
+# API URL (for Swagger docs and logging)
+API_URL=https://your-api-name.onrender.com
+
 # Database
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=xxx
