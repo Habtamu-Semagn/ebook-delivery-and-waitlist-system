@@ -130,16 +130,36 @@ Watch what happens:
 
 ## Redis Connection
 
-Render automatically provides Redis connection details via environment variables when you add the Redis addon:
+### Upstash Redis (Recommended)
+
+For Upstash or other external Redis providers, add only the `REDIS_URL` environment variable:
+
+```env
+# Add this in Render Environment Variables
+REDIS_URL=redis://default:password@host:port
+```
+
+The application will automatically use `REDIS_URL` when available.
+
+### Render Redis Addon (Alternative)
+
+If using Render's built-in Redis addon, it provides:
 
 ```env
 # These are automatically set by Render
-REDIS_URL=redis://...
 REDIS_HOST=...
-REDIS_PORT=...
+REDIS_PORT=6379
 ```
 
-Your application code just reads these variables - no manual configuration needed!
+The application falls back to `REDIS_HOST` and `REDIS_PORT` if `REDIS_URL` is not set.
+
+### How It Works
+
+The BullMQ configuration prioritizes connection methods:
+1. **First**: Checks for `REDIS_URL` (for Upstash, Redis Cloud, etc.)
+2. **Fallback**: Uses `REDIS_HOST` + `REDIS_PORT` (for Render Redis or local development)
+
+No code changes needed - just set the appropriate environment variables!
 
 ## Manual Deployment
 
@@ -238,9 +258,13 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 # Email
 RESEND_API_KEY=re_xxx
 
-# Redis (auto-populated by Render)
-REDIS_HOST=xxx
-REDIS_PORT=6379
+# Redis - Choose ONE option:
+# Option 1: Upstash or external Redis (recommended)
+REDIS_URL=redis://default:password@host:port
+
+# Option 2: Render Redis addon (auto-populated)
+# REDIS_HOST=xxx
+# REDIS_PORT=6379
 ```
 
 ### Required on Render (Web Service)

@@ -10,12 +10,26 @@ import { EmailModule } from 'src/email/email.module';
   imports: [
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const redisUrl = configService.get<string>('REDIS_URL');
+        
+        if (redisUrl) {
+          // Use REDIS_URL for Upstash or other Redis providers
+          return {
+            connection: {
+              url: redisUrl,
+            },
+          };
+        }
+        
+        // Fallback to REDIS_HOST and REDIS_PORT for local development
+        return {
+          connection: {
+            host: configService.get<string>('REDIS_HOST', 'localhost'),
+            port: configService.get<number>('REDIS_PORT', 6379),
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     BullModule.registerQueue({
