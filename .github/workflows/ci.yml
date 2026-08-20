@@ -69,11 +69,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: secrets.DOCKERHUB_USERNAME != ''
+        continue-on-error: true
 
       - name: Build and push API image
         uses: docker/build-push-action@v5
-        if: secrets.DOCKERHUB_USERNAME != ''
         with:
           context: .
           file: ./apps/api/Dockerfile
@@ -86,7 +85,6 @@ jobs:
 
       - name: Build and push Web image
         uses: docker/build-push-action@v5
-        if: secrets.DOCKERHUB_USERNAME != ''
         with:
           context: .
           file: ./apps/web/Dockerfile
@@ -114,7 +112,6 @@ jobs:
     
     steps:
       - name: Trigger Render Deployment
-        if: secrets.RENDER_DEPLOY_HOOK_API != ''
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
           if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_WEB }}" ]; then

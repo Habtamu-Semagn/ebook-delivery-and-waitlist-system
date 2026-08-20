@@ -12,16 +12,13 @@ jobs:
     
     steps:
       - name: Trigger Render API Deploy
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_API != '' }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
       
       - name: Wait for deployment
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_API != '' }}
         run: sleep 60
       
       - name: Health check
-        if: ${{ secrets.API_URL != '' }}
         run: |
           curl -f ${{ secrets.API_URL }}/health || exit 1
 
@@ -32,6 +29,5 @@ jobs:
     
     steps:
       - name: Trigger Render Web Deploy
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_WEB != '' }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB }}"
