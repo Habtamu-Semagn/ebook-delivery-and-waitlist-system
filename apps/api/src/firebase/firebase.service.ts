@@ -12,13 +12,29 @@ export class FirebaseService implements OnModuleInit {
     onModuleInit() {
         const existingApps = getApps();
         if(existingApps.length === 0) {
+            // Get Firebase configuration from environment variables
+            const projectId = this.configService.get<string>('FIREBASE_PROJECT_ID');
+            const clientEmail = this.configService.get<string>('FIREBASE_CLIENT_EMAIL');
+            const privateKey = this.configService.get<string>('FIREBASE_PRIVATE_KEY');
+
+            // Validate required Firebase configuration
+            if (!projectId || !clientEmail || !privateKey) {
+                const missing: string[] = [];
+                if (!projectId) missing.push('FIREBASE_PROJECT_ID');
+                if (!clientEmail) missing.push('FIREBASE_CLIENT_EMAIL');
+                if (!privateKey) missing.push('FIREBASE_PRIVATE_KEY');
+                
+                throw new Error(
+                    `Missing required Firebase environment variables: ${missing.join(', ')}. ` +
+                    `Please ensure these are set in your Render environment variables.`
+                );
+            }
+
             this.app = initializeApp({
                 credential: cert({
-                    projectId: this.configService.getOrThrow<string>('FIREBASE_PROJECT_ID'),
-                    clientEmail: this.configService.getOrThrow<string>('FIREBASE_CLIENT_EMAIL'),
-                    privateKey: this.configService
-                     .getOrThrow<string>('FIREBASE_PRIVATE_KEY')
-                     ?.replace(/\\n/g, '\n'),
+                    projectId,
+                    clientEmail,
+                    privateKey: privateKey.replace(/\\n/g, '\n'),
                 }),
             })
         } else {

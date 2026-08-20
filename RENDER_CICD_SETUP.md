@@ -226,6 +226,43 @@ If something goes wrong:
 3. Should see `REDIS_HOST`, `REDIS_PORT` variables
 4. If missing: Add Redis addon from Render dashboard
 
+### Firebase Configuration Errors
+
+**Error: "Configuration key FIREBASE_CLIENT_EMAIL does not exist"**
+
+This means Firebase environment variables are missing or incorrectly formatted.
+
+**Fix:**
+1. Go to Render Dashboard → Your API Service → Environment
+2. Verify these 3 variables exist:
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_CLIENT_EMAIL`
+   - `FIREBASE_PRIVATE_KEY`
+
+3. **CRITICAL: FIREBASE_PRIVATE_KEY formatting**
+   - Must include the quotes: `"-----BEGIN PRIVATE KEY-----\n..."`
+   - Keep the `\n` as literal `\n` (not actual newlines)
+   - Example format:
+   ```
+   "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANB...your-key-here...\n-----END PRIVATE KEY-----\n"
+   ```
+
+4. **After adding/updating environment variables:**
+   - Click **Save Changes**
+   - Manually trigger a redeploy from the **Manual Deploy** button
+   - Or push a new commit to trigger auto-deploy
+
+5. **Verify in logs:**
+   - Go to Logs tab
+   - Look for startup messages
+   - Should NOT see Firebase-related errors
+
+**Common mistakes:**
+- ❌ Forgetting to wrap `FIREBASE_PRIVATE_KEY` in quotes
+- ❌ Replacing `\n` with actual line breaks
+- ❌ Copy-pasting with extra spaces or invisible characters
+- ❌ Not manually triggering redeploy after adding variables
+
 ### Auto-Deploy Not Triggering
 
 **Checklist:**
