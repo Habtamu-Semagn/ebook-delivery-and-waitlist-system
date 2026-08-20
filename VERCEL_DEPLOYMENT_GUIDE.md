@@ -7,9 +7,12 @@ Complete guide for deploying the E-book System frontend to Vercel.
 This guide covers deploying the TanStack Start React application to Vercel with automatic deployments from GitHub.
 
 **Your Setup:**
-- Frontend: TanStack Start (React SSR)
+- Frontend: TanStack Start (React SSR framework - runs on Node.js)
 - Backend: Render.com (already deployed)
 - Repository: GitHub (connected to both services)
+- Deployment Type: Serverless Functions (Vercel automatically handles SSR)
+
+**Important:** TanStack Start is NOT a static site generator. It's an SSR framework that requires Node.js to run. Vercel handles this automatically by converting your app to serverless functions.
 
 ---
 
@@ -24,19 +27,11 @@ This guide covers deploying the TanStack Start React application to Vercel with 
 
 ## Step 1: Prepare Your Repository
 
-### 1.1 Create Vercel Configuration
+### 1.1 Verify Vercel Configuration
 
-Create `vercel.json` in the root of your project:
+Your repository already has `vercel.json` configured with security headers. 
 
-```json
-{
-  "buildCommand": "cd apps/web && pnpm run build",
-  "outputDirectory": "apps/web/dist/client",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": null,
-  "regions": ["iad1"]
-}
-```
+**Note:** Build configuration should be done via the Vercel Dashboard UI, not in `vercel.json`. The `vercel.json` file is kept minimal and only contains headers for security.
 
 ### 1.2 Verify Build Configuration
 
@@ -71,21 +66,41 @@ Your `apps/web/package.json` should have:
 
 ### 2.3 Configure Build Settings
 
-**Framework Preset:** Other (or Custom)
+**IMPORTANT:** TanStack Start is an SSR framework - it needs a Node.js server to run.
 
-**Root Directory:** `apps/web`
+Vercel will auto-detect your framework, but you may need to override settings:
+
+**Framework Preset:** Select "Other" (if not auto-detected)
+
+**Root Directory:** 
+- Click "Edit" next to Root Directory
+- Enter: `apps/web`
+- Click "Continue"
+
+**Build & Development Settings:**
+
+If fields are locked, click **"Override"** button next to each setting to unlock them.
 
 **Build Command:**
 ```bash
-cd ../.. && pnpm install --frozen-lockfile && cd apps/web && pnpm run build
+pnpm run build
 ```
 
-**Output Directory:** `dist/client`
+**Output Directory:**
+Leave this **EMPTY** or use: `dist`
+(TanStack Start outputs both client and server code, Vercel handles this automatically)
 
 **Install Command:**
 ```bash
 pnpm install --frozen-lockfile
 ```
+
+**Development Command:**
+```bash
+pnpm run dev
+```
+
+**Node Version:** 20.x (should be auto-detected)
 
 ---
 
@@ -140,9 +155,15 @@ SENTRY_PROJECT=your-project
 
 1. Click **Deploy** in the Vercel import wizard
 2. Vercel will:
-   - Install dependencies
-   - Build your app
-   - Deploy to a production URL
+   - Install dependencies with pnpm
+   - Build your TanStack Start app (both client and server)
+   - Deploy as a serverless function (SSR)
+
+**Important Notes:**
+- TanStack Start uses SSR (Server-Side Rendering)
+- Each page request runs on Vercel's serverless functions
+- Cold starts may occur on the free tier
+- Build time: 2-5 minutes (depending on dependencies)
 
 ### 4.2 Monitor Deployment
 
@@ -272,6 +293,30 @@ Should return 200 OK.
 
 ## Troubleshooting
 
+### Build Settings Are Locked
+
+If you see locked/grayed out fields in the Vercel project setup:
+
+**Solution 1: Click Override Button**
+- Look for an "Override" button next to each locked field
+- Click it to unlock and edit the field
+
+**Solution 2: Edit After Creation**
+1. Complete the initial setup (even with default settings)
+2. Go to **Settings** → **General** → **Build & Development Settings**
+3. Click "Override" next to each setting you want to change
+4. Save and redeploy
+
+**Solution 3: vercel.json Configuration**
+If the UI remains locked, add to `vercel.json`:
+```json
+{
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": null
+}
+```
+
 ### Build Fails with "Module not found"
 
 **Solution:** Check that all dependencies are in `package.json`
@@ -299,9 +344,19 @@ Then redeploy the backend.
 
 ### Build Succeeds But Site Shows 404
 
-**Solution:** Check output directory
-- Should be: `apps/web/dist/client`
-- Verify in **Settings** → **General**
+**Solution:** Check your build configuration
+- TanStack Start needs both `dist/client` and `dist/server`
+- Don't specify a custom output directory - leave it empty
+- Verify the build command is: `pnpm run build`
+- Check build logs for any errors during the build process
+
+**Advanced:** If issues persist, add to `vercel.json`:
+```json
+{
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist"
+}
+```
 
 ### API Calls Fail (Network Error)
 
