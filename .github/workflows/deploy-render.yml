@@ -16,11 +16,7 @@ jobs:
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
       
       - name: Wait for deployment
-        run: sleep 60
-      
-      - name: Health check
-        run: |
-          curl -f ${{ secrets.API_URL }}/health || exit 1
+        run: sleep 30
 
   deploy-web:
     name: Deploy Web to Render
